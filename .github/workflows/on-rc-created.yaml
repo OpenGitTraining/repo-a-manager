@@ -50,6 +50,10 @@ jobs:
         with:
           app-id: ${{ secrets.GH_APP__CI_ORCHESTRATOR__ID }}
           private-key: ${{ secrets.GH_APP__CI_ORCHESTRATOR__PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            repo-a
+            repo-a-manager
 
       # ⚠️ TEMP: Immediately promote the RC (no subscribers yet)
       - name: Send promote-rc to source repo
