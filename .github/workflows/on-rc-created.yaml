@@ -48,8 +48,8 @@ jobs:
         id: app_token
         uses: actions/create-github-app-token@v2
         with:
-          app_id: ${{ secrets.GH_APP__CI_ORCHESTRATOR__ID }}
-          private_key: ${{ secrets.GH_APP__CI_ORCHESTRATOR__PRIVATE_KEY }}
+          app-id: ${{ secrets.GH_APP__CI_ORCHESTRATOR__ID }}
+          private-key: ${{ secrets.GH_APP__CI_ORCHESTRATOR__PRIVATE_KEY }}
 
       # ⚠️ TEMP: Immediately promote the RC (no subscribers yet)
       - name: Send promote-rc to source repo
