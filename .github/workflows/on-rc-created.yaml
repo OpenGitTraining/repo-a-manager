@@ -1,4 +1,5 @@
 name: Handle RC created
+run-name: Handle RC created
 
 on:
   repository_dispatch:
