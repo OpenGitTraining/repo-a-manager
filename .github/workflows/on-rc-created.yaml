@@ -9,7 +9,9 @@ permissions:
 
 env:
   # Just a label for future use; not strictly required
-  PROMOTE_EVENT_TYPE: promote-rc
+  INTEGRATION_REPO: OpenGitTraining/integration-tests-AB
+  TEST_EVENT_TYPE: run-tests-repo-a
+  # PROMOTE_EVENT_TYPE: promote-rc # MOVED to new workflow
 
 jobs:
   handle-rc:
@@ -54,24 +56,27 @@ jobs:
           repositories: |
             repo-a
             repo-a-manager
+            integration-tests-AB
 
-      # ⚠️ TEMP: Immediately promote the RC (no subscribers yet)
-      - name: Send promote-rc to source repo
+      - name: Send run-tests-repo-a to integration-tests-AB
         run: |
           SRC_REPO="${{ steps.payload.outputs.source_repo }}"
           TAG="${{ steps.payload.outputs.tag }}"
+          RELEASE_URL="${{ steps.payload.outputs.release_url }}"
 
-          echo "Sending promote-rc to $SRC_REPO for tag $TAG"
+          echo "Requesting integration tests in ${{ env.INTEGRATION_REPO }}" for $SRC_REPO@$TAG"
 
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ steps.app_token.outputs.token }}" \
-            "https://api.github.com/repos/$SRC_REPO/dispatches" \
+            "https://api.github.com/repos/${{ env.INTEGRATION_REPO }}/dispatches" \
             -d @- <<EOF
           {
-            "event_type": "${{ env.PROMOTE_EVENT_TYPE }}",
+            "event_type": "${{ env.TEST_EVENT_TYPE }}",
             "client_payload": {
-              "tag": "$TAG"
+              "source_repo": "$SRC_REPO"
+              "tag": "$TAG",
+              "release_url": "$RELEASE_URL"
             }
           }
           EOF
