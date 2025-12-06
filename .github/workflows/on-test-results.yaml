@@ -1,0 +1,82 @@
+name: Handle RC test results and promote if green
+
+on:
+  repository_dispatch:
+    types: [rc-test-result]
+
+permissions:
+  contents: read
+
+env:
+  PROMOTE_EVENT_TYPE: promote-rc
+
+jobs:
+  handle-test-result:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract test result
+        id: payload
+        run: |
+          SRC_REPO="${{ github.event.client_payload.source_repo }}"
+          TAG="${{ github.event.client_payload.tag }}"
+          STATUS="${{ github.event.client_payload.status }}"
+          SUBSCRIBER="${{ github.event.client_payload.subscriber }}"
+
+          if [ -z "$SRC_REPO" ] || [ -z "$TAG" ] || [ -z "$STATUS" ]; then
+            echo "Missing source_repo, tag, or status in client_payload"
+            exit 1
+          fi
+
+          echo "source_repo=$SRC_REPO" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"
+          echo "subscriber=$SUBSCRIBER" >> "$GITHUB_OUTPUT"
+
+          echo "Received test result:"
+          echo "  source_repo: $SRC_REPO"
+          echo "  tag:         $TAG"
+          echo "  status:      $STATUS"
+          echo "  subscriber:  $SUBSCRIBER"
+
+      - name: Decide promotion
+        id: decision
+        run: |
+          STATUS="${{ steps.payload.outputs.status }}"
+          if [ "$STATUS" = "success" ]; then
+            echo "should_promote=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Tests not successful (status=$STATUS). Will not promote."
+            echo "should_promote=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate installation token (GitHub App)
+        if: steps.decision.outputs.should_promote == 'true'
+        id: app_token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.GH_APP__CI_ORCHESTRATOR__ID }}
+          private-key: ${{ secrets.GH_APP__CI_ORCHESTRATOR__PRIVATE_KEY }}
+          owner: OpenGitTraining
+          repositories: repo-a-manager,repo-A
+
+      - name: Send promote-rc to source repo
+        if: steps.decision.outputs.should_promote == 'true'
+        run: |
+          SRC_REPO="${{ steps.payload.outputs.source_repo }}"
+          TAG="${{ steps.payload.outputs.tag }}"
+
+          echo "Sending promote-rc to $SRC_REPO for tag $TAG"
+
+          curl -f -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ steps.app_token.outputs.token }}" \
+            "https://api.github.com/repos/$SRC_REPO/dispatches" \
+            -d @- <<EOF
+          {
+            "event_type": "${{ env.PROMOTE_EVENT_TYPE }}",
+            "client_payload": {
+              "tag": "$TAG"
+            }
+          }
+          EOF
