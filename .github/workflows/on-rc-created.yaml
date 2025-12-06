@@ -11,7 +11,7 @@ permissions:
 env:
   # Just a label for future use; not strictly required
   INTEGRATION_REPO: OpenGitTraining/integration-tests-AB
-  TEST_EVENT_TYPE: run-tests-repo-a
+  TEST_EVENT_TYPE: repo-a-test-request
   # PROMOTE_EVENT_TYPE: promote-rc # MOVED to new workflow
 
 jobs:
@@ -59,7 +59,7 @@ jobs:
             repo-a-manager
             integration-tests-AB
 
-      - name: Send run-tests-repo-a to integration-tests-AB
+      - name: Send Test Request
         run: |
           SRC_REPO="${{ steps.payload.outputs.source_repo }}"
           TAG="${{ steps.payload.outputs.tag }}"
