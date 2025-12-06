@@ -11,7 +11,7 @@ permissions:
 env:
   # Just a label for future use; not strictly required
   INTEGRATION_REPO: OpenGitTraining/integration-tests-AB
-  TEST_EVENT_TYPE: run-tests-repo-a
+  TEST_EVENT_TYPE: repo-a-test-request
   # PROMOTE_EVENT_TYPE: promote-rc # MOVED to new workflow
 
 jobs:
@@ -59,13 +59,13 @@ jobs:
             repo-a-manager
             integration-tests-AB
 
-      - name: Send run-tests-repo-a to integration-tests-AB
+      - name: Send Test Request
         run: |
-          SRC_REPO="${{ steps.payload.outputs.source_repo }}"
           TAG="${{ steps.payload.outputs.tag }}"
+          SRC_REPO="${{ steps.payload.outputs.source_repo }}"
           RELEASE_URL="${{ steps.payload.outputs.release_url }}"
 
-          echo "Requesting integration tests in ${{ env.INTEGRATION_REPO }}" for $SRC_REPO@$TAG"
+          echo "Requesting integration tests in ${{ env.INTEGRATION_REPO }} for $SRC_REPO@$TAG"
 
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
