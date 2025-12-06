@@ -1,4 +1,4 @@
-name: Handle RC created (temporary: immediate promotion)
+name: Handle RC created
 
 on:
   repository_dispatch:
