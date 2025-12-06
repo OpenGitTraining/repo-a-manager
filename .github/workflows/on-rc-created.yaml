@@ -75,7 +75,7 @@ jobs:
           {
             "event_type": "${{ env.TEST_EVENT_TYPE }}",
             "client_payload": {
-              "source_repo": "$SRC_REPO"
+              "source_repo": "$SRC_REPO",
               "tag": "$TAG",
               "release_url": "$RELEASE_URL"
             }
