@@ -34,6 +34,8 @@ jobs:
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"
           echo "subscriber=$SUBSCRIBER" >> "$GITHUB_OUTPUT"
 
+          sleep 5 # TODO: REMOVE ME
+
           echo "Received test result:"
           echo "  source_repo: $SRC_REPO"
           echo "  tag:         $TAG"
