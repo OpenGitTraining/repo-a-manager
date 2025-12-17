@@ -67,6 +67,8 @@ jobs:
 
           echo "Requesting integration tests in ${{ env.INTEGRATION_REPO }} for $SRC_REPO@$TAG"
 
+          sleep 5 # TODO: REMOVE ME
+
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ steps.app_token.outputs.token }}" \
